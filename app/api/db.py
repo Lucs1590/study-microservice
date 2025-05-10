@@ -1,29 +1,26 @@
 from sqlalchemy import (
     Column,
-    Integer,
     MetaData,
     String,
     Table,
-    create_engine,
-    ARRAY
+    create_engine
 )
 
 from databases import Database
 
-DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/reports_db'
+DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/users_db'
 
 database = Database(DATABASE_URL)
 engine = create_engine(DATABASE_URL)
 
 metadata = MetaData()
 
-reports = Table(
-    "reports",
+users = Table(
+    "users",
     metadata,
     Column("id", String, primary_key=True),
-    Column("content", ARRAY(String)),
-    Column("status", String),
+    Column("email", String, nullable=False),
+    Column("password", String, nullable=False),
     Column("created_at", String),
     Column("updated_at", String),
-    Column("user_id", Integer)
 )
