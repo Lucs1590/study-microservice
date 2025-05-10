@@ -21,7 +21,7 @@ users = APIRouter()
 
 
 @users.get("/", response_model=List[UserOutput])
-async def read_root():
+async def read_users():
     return await db_manager.get_all_users()
 
 
