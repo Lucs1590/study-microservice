@@ -8,7 +8,7 @@ from sqlalchemy import (
 
 from databases import Database
 
-DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/users_db'
+DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/postgres'
 
 database = Database(DATABASE_URL)
 engine = create_engine(DATABASE_URL)
