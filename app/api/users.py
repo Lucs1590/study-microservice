@@ -4,6 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, APIRouter, HTTPException, Response
 
 from app.api.models import User
+from app.api import db_manager
 
 
 users_db = [
@@ -21,31 +22,40 @@ users = APIRouter()
 
 @users.get("/", response_model=List[User])
 async def read_root():
-    return users_db
+    return await db_manager.get_all_users()
 
 
-@users.post("/", response_model=User, status_code=201)
-async def create_user(user: User):
-    user.created_at = datetime.now().isoformat()
-    user.updated_at = datetime.now().isoformat()
-    users_db.append(user.model_dump())
-    return user
+@users.post("/", status_code=201)
+async def create_user(payload: UserInput):
+    payload.created_at = datetime.now().isoformat()
+    payload.updated_at = datetime.now().isoformat()
+    user_id = await db_manager.add_user(payload)
+    response = {'id': user_id, **payload.model_dump()}
+    return response
 
 
 @users.put("/{user_id}")
-async def update_user(user_id: str, user: User):
-    for db_user in users_db:
-        if db_user["id"] == user_id:
-            db_user.update(user.model_dump(exclude_unset=True))
-            db_user["updated_at"] = datetime.now().isoformat()
-            return db_user
-    raise HTTPException(status_code=404, detail="User not found!")
+async def update_user(user_id: str, payload: UserInput):
+    user = await db_manager.get_user(user_id)
+    if user:
+        update_data = payload.model_dump(exclude_unset=True)
+        user_db_input = UserInput(**user)
+        user_db_input.model_update(update_data)
+
+        payload = user_db_input.model_dump()
+        payload.updated_at = datetime.now().isoformat()
+        payload.created_at = user["created_at"]
+        db_user = await db_manager.update_user(user_id, payload)
+        if db_user:
+            return {'id': user_id, **payload.model_dump()}
+    else:
+        raise HTTPException(status_code=404, detail="User not found!")
 
 
 @users.delete("/{user_id}", status_code=204)
 async def delete_user(user_id: str):
-    for db_user in users_db[:]:
-        if db_user["id"] == user_id:
-            users_db.remove(db_user)
-            return Response(status_code=204)
+    user = await db_manager.get_user(user_id)
+    if user:
+        await db_manager.delete_user(user_id)
+        return Response(status_code=204)
     raise HTTPException(status_code=404, detail="User not found!")
