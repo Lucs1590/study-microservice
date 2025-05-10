@@ -1,9 +1,9 @@
 from typing import List
 from datetime import datetime
 
-from fastapi import APIRouter, APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response
 
-from app.api.models import User
+from app.api.models import UserInput, UserOutput
 from app.api import db_manager
 
 
@@ -20,7 +20,7 @@ users_db = [
 users = APIRouter()
 
 
-@users.get("/", response_model=List[User])
+@users.get("/", response_model=List[UserOutput])
 async def read_root():
     return await db_manager.get_all_users()
 
