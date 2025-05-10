@@ -1,11 +1,9 @@
 from typing import List
 from datetime import datetime
 
-from fastapi import APIRouter, FastAPI, HTTPException, Response
+from fastapi import APIRouter, APIRouter, HTTPException, Response
 
 from app.api.models import Report
-
-app = FastAPI()
 
 
 reports_db = [
@@ -38,12 +36,12 @@ reports_db = [
 reports = movies = APIRouter()
 
 
-@app.get("/", response_model=List[Report])
+@reports.get("/", response_model=List[Report])
 async def read_root():
     return reports_db
 
 
-@app.post("/", response_model=Report, status_code=201)
+@reports.post("/", response_model=Report, status_code=201)
 async def create_report(report: Report):
     report.created_at = datetime.now().isoformat()
     report.updated_at = datetime.now().isoformat()
@@ -51,7 +49,7 @@ async def create_report(report: Report):
     return report
 
 
-@app.put("/{report_id}")
+@reports.put("/{report_id}")
 async def update_report(report_id: str, report: Report):
     for db_report in reports_db:
         if db_report["id"] == report_id:
@@ -61,7 +59,7 @@ async def update_report(report_id: str, report: Report):
     raise HTTPException(status_code=404, detail="Report not found")
 
 
-@app.delete("/{report_id}", status_code=204)
+@reports.delete("/{report_id}", status_code=204)
 async def delete_report(report_id: str):
     for db_report in reports_db[:]:
         if db_report["id"] == report_id:
