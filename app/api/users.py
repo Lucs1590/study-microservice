@@ -81,7 +81,7 @@ def validate_user_input(user_input_data):
         raise HTTPException(status_code=400, detail="Password is required!")
 
 
-@users.delete("/{user_id}", response_model=Response)
+@users.delete("/{user_id}", status_code=204)
 async def delete_user(user_id: str):
     user = await db_manager.get_user_by_id(user_id)
     if user:
