@@ -15,6 +15,14 @@ async def read_users():
     return await db_manager.get_all_users()
 
 
+@users.get("/{user_id}", response_model=UserOutput)
+async def read_user(user_id: str):
+    user = await db_manager.get_user_by_id(user_id)
+    if user:
+        return user
+    raise HTTPException(status_code=404, detail="User not found!")
+
+
 @users.post("/", response_model=UserOutput, status_code=201)
 async def create_user(payload: UserInput):
     payload = payload.model_dump()
@@ -34,7 +42,7 @@ async def create_user(payload: UserInput):
     }
 
 
-@users.put("/{user_id}")
+@users.put("/{user_id}", response_model=UserOutput)
 async def update_user(user_id: str, payload: UserInput):
     user = await db_manager.get_user_by_id(user_id)
     if user:
@@ -48,7 +56,15 @@ async def update_user(user_id: str, payload: UserInput):
 
         payload = user_db_input.model_dump()
         payload.updated_at = datetime.now().isoformat()
-        payload.created_at = user["created_at"]
+        payload.created_at = user.get('created_at')
+        if payload.email != user.get('email'):
+            existing_user = await db_manager.get_user_by_email(payload.email)
+            if existing_user:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Email already exists!"
+                )
+
         db_user = await db_manager.update_user(user_id, payload)
         if db_user:
             return {'id': user_id, **payload.model_dump()}
@@ -65,7 +81,7 @@ def validate_user_input(user_input_data):
         raise HTTPException(status_code=400, detail="Password is required!")
 
 
-@users.delete("/{user_id}", status_code=204)
+@users.delete("/{user_id}", response_model=Response)
 async def delete_user(user_id: str):
     user = await db_manager.get_user_by_id(user_id)
     if user:
