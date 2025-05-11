@@ -4,7 +4,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Response
 
-from app.api.models import UserInput, UserOutput
+from app.api.models import UserInput, UserOutput, UserUpdate
 from app.api import db_manager
 
 users = APIRouter()
@@ -40,7 +40,7 @@ async def create_user(payload: UserInput):
 
 
 @users.put("/{user_id}", response_model=UserOutput)
-async def update_user(user_id: str, payload: UserInput):
+async def update_user(user_id: str, payload: UserUpdate):
     user = await db_manager.get_user_by_id(user_id)
     if user:
         update_data = payload.model_dump(exclude_unset=True)
