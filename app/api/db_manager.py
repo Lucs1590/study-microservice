@@ -6,7 +6,11 @@ from app.api.db import users, database
 async def add_user(payload: dict):
     query = users.insert().values(**payload)
 
-    return await database.execute(query=query)
+    try:
+        await database.execute(query=query)
+    except Exception as e:
+        raise RuntimeError(f"Error inserting user: {e}") from e
+    return payload['id']
 
 
 async def get_all_users():
@@ -15,12 +19,12 @@ async def get_all_users():
 
 
 async def get_user_by_id(user_id: str):
-    query = users.select(users.c.id == user_id)
+    query = users.select().where(users.c.id == user_id)
     return await database.fetch_one(query=query)
 
 
 async def get_user_by_email(email: str):
-    query = users.select(users.c.email == email)
+    query = users.select().where(users.c.email == email)
     return await database.fetch_one(query=query)
 
 
@@ -34,6 +38,7 @@ async def update_user(user_id: str, payload: UserInput):
         users
         .update()
         .where(users.c.id == user_id)
-        .values(**payload.dict())
+        .values(**payload)
+        .returning(users.c.id, users.c.email, users.c.created_at, users.c.updated_at)
     )
     return await database.execute(query=query)
