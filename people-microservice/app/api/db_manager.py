@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from app.api.models import PeopleInput
-from app.api.db import people, users, database
+from app.api.db import people, database
+from app.api.service import get_user
 
 
 async def get_all_people():
@@ -14,7 +15,7 @@ async def get_person_by_id(people_id: str):
 
 
 async def add_people(payload: PeopleInput):
-    user = await get_user_by_id(payload['user_id'])
+    user = await get_user(payload.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -25,8 +26,3 @@ async def add_people(payload: PeopleInput):
     except Exception as e:
         raise RuntimeError(f"Error inserting people: {e}") from e
     return response
-
-
-async def get_user_by_id(user_id: str):
-    query = users.select().where(users.c.id == user_id)
-    return await database.fetch_one(query=query)
