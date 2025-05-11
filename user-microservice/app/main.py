@@ -3,12 +3,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.users import users
-from app.api.db import database
+from app.api.db import database, create_database
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await database.connect()
+    await create_database()
     yield
     await database.disconnect()
 
