@@ -27,14 +27,20 @@ async def create_people(people_input: PeopleInput):
     payload = {
         "name": people_input.name,
         "user_id": people_input.user_id,
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat()
+        "created_at": datetime.now(),
+        "updated_at": datetime.now()
     }
     try:
-        await db_manager.add_people(payload)
+        response = await db_manager.add_people(payload)
+    except HTTPException as err:
+        raise HTTPException(
+            status_code=err.status_code,
+            detail=err.detail
+        ) from err
     except Exception as err:
         raise HTTPException(
             status_code=500,
             detail=f"Error creating people: {err}"
         ) from err
-    return payload
+    print(response)
+    return {"id": response, "name": people_input.name}

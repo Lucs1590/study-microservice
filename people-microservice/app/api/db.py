@@ -29,6 +29,17 @@ people = Table(
     Column('updated_at', String(50)),
 )
 
+users = Table(
+    "users",
+    metadata,
+    Column("id", String, primary_key=True),
+    Column("email", String(50), nullable=False),
+    Column("password", String(50), nullable=False),
+    Column("created_at", String),
+    Column("updated_at", String),
+)
+
+
 database = Database(DATABASE_URL)
 
 
