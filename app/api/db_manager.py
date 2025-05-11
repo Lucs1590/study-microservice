@@ -3,8 +3,8 @@ from app.api.models import UserInput, UserOutput, UserUpdate
 from app.api.db import users, database
 
 
-async def add_user(payload: UserInput):
-    query = users.insert().values(**payload.dict())
+async def add_user(payload: dict):
+    query = users.insert().values(**payload)
 
     return await database.execute(query=query)
 
@@ -14,8 +14,13 @@ async def get_all_users():
     return await database.fetch_all(query=query)
 
 
-async def get_user(user_id: str):
+async def get_user_by_id(user_id: str):
     query = users.select(users.c.id == user_id)
+    return await database.fetch_one(query=query)
+
+
+async def get_user_by_email(email: str):
+    query = users.select(users.c.email == email)
     return await database.fetch_one(query=query)
 
 
