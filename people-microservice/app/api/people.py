@@ -16,6 +16,11 @@ async def get_all_people():
 
 @people.get("/{people_id}", response_model=PeopleOutput, status_code=200)
 async def get_people_by_id(people_id: int):
+    if people_id <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail="People ID must be a positive integer"
+        )
     person_data = await db_manager.get_person_by_id(people_id)
     if not person_data:
         raise HTTPException(status_code=404, detail="People not found")
@@ -42,5 +47,4 @@ async def create_people(people_input: PeopleInput):
             status_code=500,
             detail=f"Error creating people: {err}"
         ) from err
-    print(response)
     return {"id": response, "name": people_input.name}
