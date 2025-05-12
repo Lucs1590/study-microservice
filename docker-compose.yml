@@ -1,33 +1,45 @@
 services:
   user_service:
     build: ./user-microservice
-    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
     volumes:
       - ./user-microservice/:/app/
     ports:
       - 8002:8000
-    environment:
-      - DATABASE_URI=postgresql://postgres:postgres@main_db/postgres
+    env_file:
+      - .env
+    depends_on:
+      - main_db
+    networks:
+      - microservice_network
 
   people_service:
     build: ./people-microservice
-    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
     volumes:
       - ./people-microservice/:/app/
     ports:
       - 8001:8000
-    environment:
-      - DATABASE_URI=postgresql://postgres:postgres@main_db/postgres
-      - USERS_SERVICE_HOST_URL=http://user_service:8002
+    env_file:
+      - .env
+    depends_on:
+      - main_db
+    networks:
+      - microservice_network
 
   main_db:
     image: postgres:16.9-alpine
+    ports:
+      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
+    env_file:
+      - .env
+    networks:
+      - microservice_network
 
 volumes:
   postgres_data:
+
+
+networks:
+  microservice_network:
+    driver: bridge
