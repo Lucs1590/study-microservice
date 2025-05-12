@@ -7,16 +7,7 @@ services:
     ports:
       - 8002:8000
     environment:
-      - DATABASE_URI=postgresql://postgres:postgres@user_db/postgres
-
-  user_db:
-    image: postgres:12.1-alpine
-    volumes:
-      - postgres_data_user:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
+      - DATABASE_URI=postgresql://postgres:postgres@main_db/postgres
 
   people_service:
     build: ./people-microservice
@@ -26,18 +17,17 @@ services:
     ports:
       - 8001:8000
     environment:
-      - DATABASE_URI=postgresql://postgres:postgres@people_db/postgres
+      - DATABASE_URI=postgresql://postgres:postgres@main_db/postgres
       - USERS_SERVICE_HOST_URL=http://user_service:8002
 
-  people_db:
-    image: postgres:12.1-alpine
+  main_db:
+    image: postgres:16.9-alpine
     volumes:
-      - postgres_data_people:/var/lib/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
 
 volumes:
-  postgres_data_user:
-  postgres_data_people:
+  postgres_data:
