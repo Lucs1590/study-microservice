@@ -13,6 +13,11 @@ async def lifespan(_: FastAPI):
     yield
     await database.disconnect()
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    openapi_url="/api/v1/people/openapi.json",
+    docs_url="/api/v1/people/docs",
+    redoc_url="/api/v1/people/redoc"
+)
 
 app.include_router(people, prefix="/api/v1/people", tags=["people"])
