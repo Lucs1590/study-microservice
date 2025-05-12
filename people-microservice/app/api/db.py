@@ -1,4 +1,3 @@
-from sqlalchemy import inspect
 import os
 from sqlalchemy import (
     Column,
@@ -6,6 +5,7 @@ from sqlalchemy import (
     MetaData,
     String,
     Table,
+    ForeignKey,
     create_engine
 )
 from dotenv import load_dotenv
@@ -22,7 +22,7 @@ people = Table(
     'people',
     metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('user_id', String, foreign_key='users.id'),
+    Column('user_id', String, ForeignKey('users.id')),
     Column('name', String(50)),
     Column('created_at', String(50)),
     Column('updated_at', String(50)),
