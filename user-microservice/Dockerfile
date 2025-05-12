@@ -38,6 +38,9 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.t
     && rm -rf /wheels
 
 COPY . /app
-RUN chown -R appuser:appgroup /app
+
+RUN chmod +x /app/wait-for-postgres.sh && chown -R appuser:appgroup /app
 
 USER appuser
+
+CMD ["./wait-for-postgres.sh", "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
