@@ -15,9 +15,14 @@ async def get_person_by_id(people_id: str):
 
 
 async def add_people(payload: PeopleInput):
-    user = await get_user(payload.user_id)
+    user = await get_user(payload['user_id'])
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    query = people.select().where(people.c.user_id == payload['user_id'])
+    existing_people = await database.fetch_one(query=query)
+    if existing_people:
+        raise HTTPException(status_code=400, detail="User already in use")
 
     query = people.insert().values(**payload)
 
