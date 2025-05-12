@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff AS builder
 
 ENV \
     DEBIAN_FRONTEND=noninteractive \
@@ -10,20 +10,20 @@ ENV \
 WORKDIR /app
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends gcc \
- && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends gcc \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /wheels -r requirements.txt
 
-FROM python:3.12-slim
+FROM python:alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff
 
 ENV \
     DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1
 
 RUN groupadd --system appgroup \
- && useradd --system --gid appgroup --home /app appuser
+    && useradd --system --gid appgroup --home /app appuser
 
 WORKDIR /app
 
@@ -31,7 +31,7 @@ COPY --from=builder /wheels /wheels
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
- && rm -rf /wheels
+    && rm -rf /wheels
 
 COPY . /app
 RUN chown -R appuser:appgroup /app

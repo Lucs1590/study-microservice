@@ -1,14 +1,39 @@
-FROM python:3.12-slim
+FROM python:alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff AS builder
+
+ENV \
+    DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100
 
 WORKDIR /app
 
-COPY ./requirements.txt /app/requirements.txt
-
 RUN apt-get update \
-    && apt-get install gcc -y \
-    && apt-get clean
+    && apt-get install -y --no-install-recommends gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -r /app/requirements.txt \
-    && rm -rf /root/.cache/pip
+COPY requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /wheels -r requirements.txt
 
-COPY . /app/
+FROM python:alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff
+
+ENV \
+    DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1
+
+RUN groupadd --system appgroup \
+    && useradd --system --gid appgroup --home /app appuser
+
+WORKDIR /app
+
+COPY --from=builder /wheels /wheels
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
+    && rm -rf /wheels
+
+COPY . /app
+RUN chown -R appuser:appgroup /app
+
+USER appuser
