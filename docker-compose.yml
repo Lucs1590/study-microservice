@@ -36,6 +36,18 @@ services:
     networks:
       - microservice_network
 
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./nginx_config.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - user_service
+      - people_service
+    networks:
+      - microservice_network
+
 volumes:
   postgres_data:
 
