@@ -9,9 +9,7 @@ ENV \
 
 WORKDIR /app
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev
 
 COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /wheels -r requirements.txt
@@ -22,8 +20,10 @@ ENV \
     DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1
 
-RUN groupadd --system appgroup \
-    && useradd --system --gid appgroup --home /app appuser
+RUN apk add --no-cache libffi openssl
+
+RUN addgroup -S appgroup \
+    && adduser -S -G appgroup -h /app appuser
 
 WORKDIR /app
 
