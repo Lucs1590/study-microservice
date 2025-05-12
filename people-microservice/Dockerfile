@@ -22,7 +22,7 @@ ENV \
     PYTHONUNBUFFERED=1
 
 # Install runtime dependencies
-RUN apk add --no-cache libffi openssl postgresql-libs
+RUN apk add --no-cache libffi openssl postgresql-libs postgresql-client
 
 RUN addgroup -S appgroup \
     && adduser -S -G appgroup -h /app appuser
@@ -43,4 +43,4 @@ RUN chmod +x /app/wait-for-postgres.sh && chown -R appuser:appgroup /app
 
 USER appuser
 
-CMD ["./wait-for-postgres.sh", "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "wait-for-postgres.sh", "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
