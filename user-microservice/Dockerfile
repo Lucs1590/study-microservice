@@ -10,10 +10,10 @@ ENV \
 WORKDIR /app
 
 # Install build dependencies
-RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev
+RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev postgresql-dev
 
 COPY requirements.txt .
-RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
+RUN mkdir -p /wheels && pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
 
 FROM python:alpine@sha256:452682e4648deafe431ad2f2391d726d7c52f0ff291be8bd4074b10379bb89ff
 
@@ -22,7 +22,7 @@ ENV \
     PYTHONUNBUFFERED=1
 
 # Install runtime dependencies
-RUN apk add --no-cache libffi openssl
+RUN apk add --no-cache libffi openssl postgresql-libs
 
 RUN addgroup -S appgroup \
     && adduser -S -G appgroup -h /app appuser
